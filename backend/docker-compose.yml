@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+    app:
+        image: laravel:latest
+        container_name: laravel_app
+        build:
+            context: .
+            dockerfile: .dev-ops/Dockerfile
+        working_dir: /var/www/html
+        volumes:
+            - ./:/var/www/html
+        env_file:
+            - ./.env
+        networks:
+            - laravel
+
+    db:
+        image: mysql:8.0
+        container_name: mysql_db
+        volumes:
+            - mysql_data:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}  # Updated to match the .env file
+            - MYSQL_USER=${MYSQL_USER}  # Updated to match the .env file
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}  # Updated to match the .env file
+        ports:
+            - "13306:3306"
+        networks:
+            - laravel
+
+    webserver:
+        image: nginx:alpine
+        container_name: nginx_web
+        ports:
+            - "8080:80"
+        volumes:
+            - ./:/var/www/html
+            - .dev-ops/nginx/default.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - app
+        networks:
+            - laravel
+
+networks:
+    laravel:
+
+volumes:
+    mysql_data:
