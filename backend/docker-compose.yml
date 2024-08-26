@@ -14,6 +14,16 @@ services:
             - ./.env
         networks:
             - laravel
+        environment:
+            - APP_ENV=local
+            - APP_DEBUG=true
+            - APP_KEY=${APP_KEY}
+            - DB_CONNECTION=mysql
+            - DB_HOST=db
+            - DB_PORT=3306
+            - DB_DATABASE=${DB_DATABASE}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
 
     db:
         image: mysql:8.0
@@ -21,10 +31,10 @@ services:
         volumes:
             - mysql_data:/var/lib/mysql
         environment:
-            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-            - MYSQL_DATABASE=${MYSQL_DATABASE}  # Updated to match the .env file
-            - MYSQL_USER=${MYSQL_USER}  # Updated to match the .env file
-            - MYSQL_PASSWORD=${MYSQL_PASSWORD}  # Updated to match the .env file
+            - MYSQL_ROOT_PASSWORD=yourpassword
+            - MYSQL_DATABASE=contacts_db
+            - MYSQL_USER=app
+            - MYSQL_PASSWORD=yourpassword
         ports:
             - "13306:3306"
         networks:

@@ -1,5 +1,5 @@
 # Variables
-DOCKER_COMPOSE_BACKEND = docker-compose -f ./backend/docker-compose.yml
+DOCKER_COMPOSE_BACKEND = docker-compose
 APP_CONTAINER = laravel_app
 
 # Rebuild everything from scratch for the backend
@@ -31,16 +31,8 @@ backend-start:
 backend-stop:
 	$(DOCKER_COMPOSE_BACKEND) down
 
-# Execute a command as normal user inside the backend app container
-backend-exec:
-	$(DOCKER_COMPOSE_BACKEND) exec $(APP_CONTAINER) $(cmd)
-
-# Execute a command as root inside the backend app container
-backend-exec-root:
-	$(DOCKER_COMPOSE_BACKEND) exec --user root $(APP_CONTAINER) $(cmd)
-
-# SSH into the backend app container
+# SSH into the backend app container using docker exec
 backend-ssh:
-	$(DOCKER_COMPOSE_BACKEND) exec -it $(APP_CONTAINER) /bin/sh
+	docker exec -it $(APP_CONTAINER) /bin/sh
 
 .PHONY: backend-rebuild backend-clean-all backend-clean backend-build backend-install backend-start backend-stop backend-exec backend-exec-root backend-ssh

@@ -2,83 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\Contact\StoreContactRequest;
+use App\Http\Requests\Contact\UpdateContactRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ContactController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function store(StoreContactRequest $request, $contactBookId)
     {
-        //
+        $contactBook = Auth::user()->contactBooks()->findOrFail($contactBookId);
+
+        $contact = $contactBook->contacts()->create($request->validated());
+
+        return response()->json($contact, 201);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function show($contactBookId, $id)
     {
-        //
+        $contactBook = Auth::user()->contactBooks()->findOrFail($contactBookId);
+        $contact = $contactBook->contacts()->findOrFail($id);
+
+        return response()->json($contact);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function update(UpdateContactRequest $request, $contactBookId, $id)
     {
-        //
+        $contactBook = Auth::user()->contactBooks()->findOrFail($contactBookId);
+        $contact = $contactBook->contacts()->findOrFail($id);
+
+        $contact->update($request->validated());
+
+        return response()->json($contact);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function destroy($contactBookId, $id)
     {
-        //
-    }
+        $contactBook = Auth::user()->contactBooks()->findOrFail($contactBookId);
+        $contact = $contactBook->contacts()->findOrFail($id);
+        $contact->delete();
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return response()->json(null, 204);
     }
 }
