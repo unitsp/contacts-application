@@ -6,22 +6,19 @@
       <sourceFolder url="file://$MODULE_DIR$/backend/database/factories" isTestSource="false" packagePrefix="Database\Factories\" />
       <sourceFolder url="file://$MODULE_DIR$/backend/database/seeders" isTestSource="false" packagePrefix="Database\Seeders\" />
       <sourceFolder url="file://$MODULE_DIR$/backend/tests" isTestSource="true" packagePrefix="Tests\" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/asm89/stack-cors" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/brick/math" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/carbonphp/carbon-doctrine-types" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/dflydev/dot-access-data" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/inflector" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/instantiator" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/lexer" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/dragonmantank/cron-expression" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/egulias/email-validator" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/facade/flare-client-php" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/facade/ignition" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/facade/ignition-contracts" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/fakerphp/faker" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/filp/whoops" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/fruitcake/laravel-cors" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/graham-campbell/result-type" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/guzzlehttp/guzzle" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/guzzlehttp/promises" />
@@ -45,7 +42,6 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nette/utils" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nikic/php-parser" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nunomaduro/collision" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/opis/closure" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phar-io/manifest" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phar-io/version" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/phpoption/phpoption" />
@@ -80,10 +76,8 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/object-enumerator" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/object-reflector" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/recursion-context" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/resource-operations" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/type" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/version" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/swiftmailer/swiftmailer" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/console" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/css-selector" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/deprecation-contracts" />
@@ -95,15 +89,12 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/http-kernel" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/mime" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-ctype" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-iconv" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-intl-grapheme" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-intl-idn" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-intl-normalizer" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-mbstring" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-php72" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-php73" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-php80" />
-      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-php81" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/process" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/routing" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/service-contracts" />
@@ -116,6 +107,21 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/webmozart/assert" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/fruitcake/php-cors" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/guzzlehttp/uri-template" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/laravel/prompts" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/league/flysystem-local" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/nunomaduro/termwind" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/spatie/backtrace" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/spatie/error-solutions" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/spatie/flare-client-php" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/spatie/ignition" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/spatie/laravel-ignition" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/mailer" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-php83" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-uuid" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/uid" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/yaml" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -28,7 +28,6 @@ COPY . /var/www/html
 
 # Install application dependencies
 RUN composer install
-
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
 CMD ["php-fpm"]
