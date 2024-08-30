@@ -89,6 +89,6 @@ class UserAuthenticationTest extends TestCase
             'password' => 'wrongpassword',
         ]);
         $response->assertStatus(401)
-            ->assertJson(['message' => 'Invalid login credentials']);
+            ->assertJson(['error' => 'Invalid login credentials']);
     }
 }

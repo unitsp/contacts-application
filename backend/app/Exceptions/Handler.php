@@ -6,6 +6,10 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -16,7 +20,7 @@ class Handler extends ExceptionHandler
      * @var array<int, class-string<Throwable>>
      */
     protected $dontReport = [
-        //
+        // Add exceptions here that should not be reported
     ];
 
     /**
@@ -38,25 +42,63 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            // Customize how exceptions are reported here
         });
     }
+
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Throwable  $exception
+     * @return \Illuminate\Http\Response
+     */
     public function render($request, Throwable $exception)
     {
-        if ($exception instanceof ModelNotFoundException) {
-            return response()->json(['error' => 'Resource not found'], 404);
-        }
-
+        // Handle authentication exceptions
         if ($exception instanceof AuthenticationException) {
-            return response()->json(['error' => 'Unauthenticated'], 401);
+            return response()->json(['error' => 'Unauthenticated.'], Response::HTTP_UNAUTHORIZED);
         }
 
+        // Handle authorization exceptions
         if ($exception instanceof AuthorizationException) {
-            return response()->json(['error' => 'Forbidden'], 403);
+            return response()->json(['error' => 'This action is unauthorized.'], Response::HTTP_FORBIDDEN);
         }
 
+        // Handle model not found exceptions
+        if ($exception instanceof ModelNotFoundException) {
+            return response()->json(['error' => 'Resource not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Handle validation exceptions
+        if ($exception instanceof ValidationException) {
+            return response()->json([
+                'error' => 'Validation failed.',
+                'messages' => $exception->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        // Handle HTTP exceptions (e.g., those triggered by abort())
+        if ($exception instanceof HttpException) {
+            return response()->json([
+                'error' => $exception->getMessage(),
+            ], $exception->getStatusCode());
+        }
+
+        // Handle generic HTTP response exceptions
+        if ($exception instanceof HttpResponseException) {
+            return $exception->getResponse();
+        }
+
+        // Handle other exceptions globally
+        if ($request->expectsJson()) {
+            return response()->json([
+                'error' => $exception->getMessage(),
+                'trace' => config('app.debug') ? $exception->getTrace() : null,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // Default to the parent handler for non-JSON requests
         return parent::render($request, $exception);
     }
-
-
 }
