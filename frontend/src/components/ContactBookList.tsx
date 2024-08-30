@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
-// Define the ContactBook interface at the top
 interface ContactBook {
     id: number;
     name: string;
@@ -15,14 +14,20 @@ const useContactBooks = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        axios.get<ContactBook[]>(`${process.env.REACT_APP_API_URL}/api/contact-books`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-            },
-        })
-            .then(response => setContactBooks(response.data))
-            .catch(() => setError('Failed to load contact books.'))
-            .finally(() => setLoading(false));
+        const fetchContactBooks = async () => {
+            try {
+                const { data } = await axios.get<ContactBook[]>(`${process.env.REACT_APP_API_URL}/api/contact-books`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+                });
+                setContactBooks(data);
+            } catch {
+                setError('Failed to load contact books.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchContactBooks();
     }, []);
 
     return { contactBooks, setContactBooks, loading, error };
@@ -33,74 +38,61 @@ const ContactBookList: React.FC = () => {
     const [editingBookId, setEditingBookId] = useState<number | null>(null);
     const [newBookName, setNewBookName] = useState<string>('');
 
-    const handleCreateContactBook = async () => {
+    const handleCreateOrUpdateContactBook = useCallback(async () => {
         if (!newBookName.trim()) return;
 
+        const requestConfig = {
+            headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+        };
+
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/contact-books`,
-                { name: newBookName },
-                { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } }
-            );
+            if (editingBookId !== null) {
+                const { data } = await axios.put(`${process.env.REACT_APP_API_URL}/api/contact-books/${editingBookId}`,
+                    { name: newBookName }, requestConfig);
+                setContactBooks(prevBooks => prevBooks.map(book =>
+                    book.id === editingBookId ? { ...book, name: data.name } : book
+                ));
+            } else {
+                const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/contact-books`,
+                    { name: newBookName }, requestConfig);
+                setContactBooks(prevBooks => [...prevBooks, data]);
+            }
             setNewBookName('');
-            setContactBooks([...contactBooks, response.data]);
+            setEditingBookId(null);
         } catch (error) {
-            console.error('Failed to create contact book.', error);
+            console.error(`Failed to ${editingBookId ? 'update' : 'create'} contact book.`, error);
         }
-    };
+    }, [newBookName, editingBookId, setContactBooks]);
 
     const handleEditContactBook = (id: number, name: string) => {
         setEditingBookId(id);
         setNewBookName(name);
     };
 
-    const handleUpdateContactBook = async () => {
-        if (!newBookName.trim() || editingBookId === null) return;
-
-        try {
-            const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/contact-books/${editingBookId}`,
-                { name: newBookName },
-                { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } }
-            );
-            setContactBooks(contactBooks.map(book =>
-                book.id === editingBookId ? { ...book, name: response.data.name } : book
-            ));
-            setEditingBookId(null);
-            setNewBookName('');
-        } catch (error) {
-            console.error('Failed to update contact book.', error);
-        }
-    };
-
-    const handleDeleteContactBook = async (id: number) => {
+    const handleDeleteContactBook = useCallback(async (id: number) => {
         try {
             await axios.delete(`${process.env.REACT_APP_API_URL}/api/contact-books/${id}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
             });
-            setContactBooks(contactBooks.filter(book => book.id !== id));
+            setContactBooks(prevBooks => prevBooks.filter(book => book.id !== id));
         } catch (error) {
             console.error('Failed to delete contact book.', error);
         }
-    };
+    }, [setContactBooks]);
 
     const formatDateTime = (dateTimeString: string) => {
-        const options: Intl.DateTimeFormatOptions = {
+        return new Date(dateTimeString).toLocaleString(undefined, {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-        };
-        return new Date(dateTimeString).toLocaleDateString(undefined, options);
+        });
     };
 
-    if (loading) {
-        return <p className="text-gray-500 text-center">Loading...</p>;
-    }
-
-    if (error) {
-        return <p className="text-red-500 text-center">{error}</p>;
-    }
+    if (loading) return <p className="text-gray-500 text-center">Loading...</p>;
+    if (error) return <p className="text-red-500 text-center">{error}</p>;
 
     return (
         <div className="bg-white shadow-lg rounded-lg p-6">
@@ -113,7 +105,7 @@ const ContactBookList: React.FC = () => {
                     className="border rounded p-2 flex-grow mr-2"
                 />
                 <button
-                    onClick={editingBookId ? handleUpdateContactBook : handleCreateContactBook}
+                    onClick={handleCreateOrUpdateContactBook}
                     className="bg-green-500 text-white px-4 py-2 rounded"
                 >
                     {editingBookId ? "Update Contact Book" : "Create Contact Book"}
@@ -124,12 +116,8 @@ const ContactBookList: React.FC = () => {
                     <li key={book.id} className="py-4 flex justify-between items-center">
                         <div>
                             <h2 className="text-lg font-semibold text-gray-900">{book.name}</h2>
-                            <p className="text-sm text-gray-500">
-                                Created: {formatDateTime(book.created_at)}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                                Updated: {formatDateTime(book.updated_at)}
-                            </p>
+                            <p className="text-sm text-gray-500">Created: {formatDateTime(book.created_at)}</p>
+                            <p className="text-sm text-gray-500">Updated: {formatDateTime(book.updated_at)}</p>
                         </div>
                         <div className="flex space-x-2">
                             <button
