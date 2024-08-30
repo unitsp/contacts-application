@@ -19,9 +19,8 @@ build:
 
 # Install the app (start services, install dependencies, run migrations)
 install: start
-	sleep 10  # Wait for services to initialize
-	$(DOCKER_COMPOSE) exec $(APP_CONTAINER) composer install
-	$(DOCKER_COMPOSE) exec $(APP_CONTAINER) php artisan migrate
+	docker exec $(APP_CONTAINER) composer install
+	docker exec $(APP_CONTAINER) php artisan migrate
 
 # Start the app (Docker containers)
 start:
@@ -35,4 +34,12 @@ stop:
 ssh:
 	docker exec -it $(APP_CONTAINER) /bin/sh
 
-.PHONY: rebuild clean-all clean build install start stop ssh
+# Run migration
+migrate:
+	docker exec -it $(APP_CONTAINER) php artisan migrate
+
+# Run PHP unit tests
+test:
+	docker exec -it $(APP_CONTAINER) php artisan test
+
+.PHONY: rebuild clean-all clean build install start stop ssh test
