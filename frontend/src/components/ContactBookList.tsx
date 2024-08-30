@@ -9,7 +9,6 @@ interface ContactBook {
     updated_at: string;
 }
 
-// Define the hook at the top of the file
 const useContactBooks = () => {
     const [contactBooks, setContactBooks] = useState<ContactBook[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -31,6 +30,7 @@ const useContactBooks = () => {
 
 const ContactBookList: React.FC = () => {
     const { contactBooks, setContactBooks, loading, error } = useContactBooks();
+    const [editingBookId, setEditingBookId] = useState<number | null>(null);
     const [newBookName, setNewBookName] = useState<string>('');
 
     const handleCreateContactBook = async () => {
@@ -45,6 +45,40 @@ const ContactBookList: React.FC = () => {
             setContactBooks([...contactBooks, response.data]);
         } catch (error) {
             console.error('Failed to create contact book.', error);
+        }
+    };
+
+    const handleEditContactBook = (id: number, name: string) => {
+        setEditingBookId(id);
+        setNewBookName(name);
+    };
+
+    const handleUpdateContactBook = async () => {
+        if (!newBookName.trim() || editingBookId === null) return;
+
+        try {
+            const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/contact-books/${editingBookId}`,
+                { name: newBookName },
+                { headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` } }
+            );
+            setContactBooks(contactBooks.map(book =>
+                book.id === editingBookId ? { ...book, name: response.data.name } : book
+            ));
+            setEditingBookId(null);
+            setNewBookName('');
+        } catch (error) {
+            console.error('Failed to update contact book.', error);
+        }
+    };
+
+    const handleDeleteContactBook = async (id: number) => {
+        try {
+            await axios.delete(`${process.env.REACT_APP_API_URL}/api/contact-books/${id}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
+            });
+            setContactBooks(contactBooks.filter(book => book.id !== id));
+        } catch (error) {
+            console.error('Failed to delete contact book.', error);
         }
     };
 
@@ -73,16 +107,16 @@ const ContactBookList: React.FC = () => {
             <div className="mb-4 flex justify-between items-center">
                 <input
                     type="text"
-                    placeholder="New Contact Book Name"
+                    placeholder={editingBookId ? "Update Contact Book Name" : "New Contact Book Name"}
                     value={newBookName}
                     onChange={(e) => setNewBookName(e.target.value)}
                     className="border rounded p-2 flex-grow mr-2"
                 />
                 <button
-                    onClick={handleCreateContactBook}
+                    onClick={editingBookId ? handleUpdateContactBook : handleCreateContactBook}
                     className="bg-green-500 text-white px-4 py-2 rounded"
                 >
-                    Create Contact Book
+                    {editingBookId ? "Update Contact Book" : "Create Contact Book"}
                 </button>
             </div>
             <ul className="divide-y divide-gray-200">
@@ -97,9 +131,23 @@ const ContactBookList: React.FC = () => {
                                 Updated: {formatDateTime(book.updated_at)}
                             </p>
                         </div>
-                        <button className="text-indigo-600 hover:text-indigo-900 font-medium">
-                            View Details
-                        </button>
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => handleEditContactBook(book.id, book.name)}
+                                className="text-blue-600 hover:text-blue-900 font-medium"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => handleDeleteContactBook(book.id)}
+                                className="text-red-600 hover:text-red-900 font-medium"
+                            >
+                                Delete
+                            </button>
+                            <button className="text-indigo-600 hover:text-indigo-900 font-medium">
+                                View Details
+                            </button>
+                        </div>
                     </li>
                 ))}
             </ul>
