@@ -8,9 +8,7 @@ const HomePage: React.FC = () => {
     useEffect(() => {
         // Check if the user is logged in
         const token = localStorage.getItem('auth_token');
-        if (token) {
-            setIsLoggedIn(true);
-        }
+        setIsLoggedIn(!!token); // Simplified check
     }, []);
 
     const handleLogin = () => {
@@ -25,6 +23,12 @@ const HomePage: React.FC = () => {
         navigate('/contact-books');
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('auth_token');
+        setIsLoggedIn(false);
+        navigate('/'); // Navigate to home page after logout
+    };
+
     return (
         <div className="container mx-auto text-center">
             {isLoggedIn ? (
@@ -32,9 +36,15 @@ const HomePage: React.FC = () => {
                     <h1 className="text-2xl font-bold mb-4">Welcome Back!</h1>
                     <button
                         onClick={handleViewContactBooks}
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        className="bg-blue-500 text-white px-4 py-2 rounded m-2"
                     >
                         View Contact Books
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="bg-red-500 text-white px-4 py-2 rounded m-2"
+                    >
+                        Logout
                     </button>
                 </div>
             ) : (
