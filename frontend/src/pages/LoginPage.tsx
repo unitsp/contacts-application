@@ -13,6 +13,13 @@ const useFormState = (initialState: any) => {
         setFormState({ ...formState, [id]: value });
     };
 
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+        if (!formState.email) newErrors.email = 'Email is required';
+        if (!formState.password) newErrors.password = 'Password is required';
+        return newErrors;
+    };
+
     return {
         formState,
         errors,
@@ -20,6 +27,7 @@ const useFormState = (initialState: any) => {
         setErrors,
         setLoading,
         handleChange,
+        validateForm,
     };
 };
 
@@ -45,6 +53,7 @@ const LoginPage: React.FC = () => {
         setErrors,
         setLoading,
         handleChange,
+        validateForm,
     } = useFormState({
         email: '',
         password: '',
@@ -56,6 +65,13 @@ const LoginPage: React.FC = () => {
         e.preventDefault();
         setErrors({});
 
+        // Validate form inputs before API call
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
         setLoading(true);
         try {
             const token = await loginUser(formState);
@@ -63,13 +79,12 @@ const LoginPage: React.FC = () => {
             navigate('/contact-books');
         } catch (error: any) {
             if (error.response?.data?.errors) {
-                // If there are specific errors returned from the API
                 setErrors(error.response.data.errors);
+            } else if (error.response?.data?.messages) {
+                setErrors(error.response.data.messages);
             } else if (error.message) {
-                // For network errors or CORS errors
                 setErrors({ general: error.message });
             } else {
-                // Fallback general error
                 setErrors({ general: 'Something went wrong. Please try again.' });
             }
         } finally {

@@ -48,10 +48,11 @@ describe('LoginPage', () => {
         fireEvent.click(screen.getByRole('button', { name: /Login/i }));
 
         await waitFor(() => {
-            expect(screen.getByText(/Email is required/i)).toBeInTheDocument();
-            expect(screen.getByText(/Password is required/i)).toBeInTheDocument();
+            expect(screen.getByText((content, element) => content.includes('Email is required'))).toBeInTheDocument();
+            expect(screen.getByText((content, element) => content.includes('Password is required'))).toBeInTheDocument();
         });
     });
+
 
     it('submits the form and navigates on success', async () => {
         mockedAxios.post.mockResolvedValueOnce({ data: { token: 'fake_token' } });
@@ -88,9 +89,7 @@ describe('LoginPage', () => {
         fireEvent.click(screen.getByRole('button', { name: /Login/i }));
 
         await waitFor(() =>
-            expect(
-                screen.findByRole('alert', { name: /Something went wrong. Please try again/i })
-            ).toBeInTheDocument()
+            expect(screen.getByText('Network Error')).toBeInTheDocument()
         );
     });
 });
