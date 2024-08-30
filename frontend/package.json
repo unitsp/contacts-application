@@ -47,13 +47,19 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "setupFilesAfterEnv": ["<rootDir>/src/setupTests.ts"],
     "testEnvironment": "jsdom",
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
-    "transformIgnorePatterns": ["<rootDir>/node_modules/"]
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ]
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

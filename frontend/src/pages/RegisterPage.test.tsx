@@ -1,8 +1,10 @@
 import React from 'react';
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import RegisterPage from './RegisterPage';
 import axios from 'axios';
+
 
 // Mock axios
 jest.mock('axios');
@@ -16,17 +18,28 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('RegisterPage', () => {
+    const setup = () => {
+        render(
+            <BrowserRouter>
+                <RegisterPage />
+            </BrowserRouter>
+        );
+    };
+
+    const fillForm = (name: string, email: string, password: string, passwordConfirmation: string) => {
+        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: name } });
+        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: email } });
+        fireEvent.change(screen.getByLabelText('Password'), { target: { value: password } });
+        fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: passwordConfirmation } });
+    };
+
     beforeEach(() => {
         mockedAxios.post.mockClear();
         mockNavigate.mockClear();
     });
 
     it('renders RegisterPage with all fields', () => {
-        render(
-            <BrowserRouter>
-                <RegisterPage />
-            </BrowserRouter>
-        );
+        setup();
 
         expect(screen.getByLabelText(/Name/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
@@ -35,35 +48,22 @@ describe('RegisterPage', () => {
     });
 
     it('displays validation errors when form is submitted with empty fields', async () => {
-        render(
-            <BrowserRouter>
-                <RegisterPage />
-            </BrowserRouter>
-        );
+        setup();
 
-        fireEvent.click(screen.getByText(/Submit/i));
+        fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
         await waitFor(() => {
             expect(screen.getByText(/Name is required/i)).toBeInTheDocument();
             expect(screen.getByText(/Email is required/i)).toBeInTheDocument();
             expect(screen.getByText(/Password is required/i)).toBeInTheDocument();
-            // Removed the password mismatch expectation here
         });
     });
 
     it('displays a password mismatch error when passwords do not match', async () => {
-        render(
-            <BrowserRouter>
-                <RegisterPage />
-            </BrowserRouter>
-        );
+        setup();
 
-        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } });
-        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } });
-        fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password123' } });
-        fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'differentPassword' } });
-
-        fireEvent.click(screen.getByText(/Submit/i));
+        fillForm('John Doe', 'john@example.com', 'password123', 'differentPassword');
+        fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
         await waitFor(() => {
             expect(screen.getByText(/Passwords do not match/i)).toBeInTheDocument();
@@ -73,18 +73,9 @@ describe('RegisterPage', () => {
     it('submits the form and navigates on success', async () => {
         mockedAxios.post.mockResolvedValueOnce({ data: { token: 'fake_token' } });
 
-        render(
-            <BrowserRouter>
-                <RegisterPage />
-            </BrowserRouter>
-        );
-
-        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } });
-        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } });
-        fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
-        fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'password' } });
-
-        fireEvent.click(screen.getByText(/Submit/i));
+        setup();
+        fillForm('John Doe', 'john@example.com', 'password', 'password');
+        fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
         await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/contact-books'));
         expect(localStorage.getItem('auth_token')).toBe('fake_token');
@@ -99,18 +90,9 @@ describe('RegisterPage', () => {
             }
         });
 
-        render(
-            <BrowserRouter>
-                <RegisterPage />
-            </BrowserRouter>
-        );
-
-        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } });
-        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } });
-        fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
-        fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'password' } });
-
-        fireEvent.click(screen.getByText(/Submit/i));
+        setup();
+        fillForm('John Doe', 'john@example.com', 'password', 'password');
+        fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
         await waitFor(() => expect(screen.getByText(/Email is already taken/i)).toBeInTheDocument());
     });
@@ -118,18 +100,9 @@ describe('RegisterPage', () => {
     it('displays general error message on unknown error', async () => {
         mockedAxios.post.mockRejectedValueOnce(new Error('Network Error'));
 
-        render(
-            <BrowserRouter>
-                <RegisterPage />
-            </BrowserRouter>
-        );
-
-        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } });
-        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } });
-        fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
-        fireEvent.change(screen.getByLabelText('Confirm Password'), { target: { value: 'password' } });
-
-        fireEvent.click(screen.getByText(/Submit/i));
+        setup();
+        fillForm('John Doe', 'john@example.com', 'password', 'password');
+        fireEvent.click(screen.getByRole('button', { name: /Submit/i }));
 
         await waitFor(() => expect(screen.getByText(/Something went wrong. Please try again/i)).toBeInTheDocument());
     });

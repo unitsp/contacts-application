@@ -1,91 +1,89 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import FormField from '../components/Forms/FormField';
 
-// Utility function for form validation
-const validateForm = (formState: any) => {
-    const newErrors: { [key: string]: string } = {};
-    if (!formState.name) newErrors.name = 'Name is required';
-    if (!formState.email) newErrors.email = 'Email is required';
-    if (!formState.password) newErrors.password = 'Password is required';
-    if (formState.password !== formState.passwordConfirmation) newErrors.passwordConfirmation = 'Passwords do not match';
-    return newErrors;
-};
-
-const FormField: React.FC<{
-    id: string;
-    label: string;
-    type?: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    error?: string;
-}> = ({ id, label, type = 'text', value, onChange, error }) => (
-    <div className="mb-4">
-        <label className="block text-left mb-2" htmlFor={id}>
-            {label}
-        </label>
-        <input
-            type={type}
-            id={id}
-            value={value}
-            onChange={onChange}
-            className="w-full px-3 py-2 border rounded"
-            aria-describedby={`${id}-error`}
-        />
-        {error && <p id={`${id}-error`} className="text-red-500 text-left" role="alert">{error}</p>}
-    </div>
-);
-
-const RegisterPage: React.FC = () => {
-    const [formState, setFormState] = useState({
-        name: '',
-        email: '',
-        password: '',
-        passwordConfirmation: '',
-    });
+const useFormState = (initialState: any) => {
+    const [formState, setFormState] = useState(initialState);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         setFormState({ ...formState, [id]: value });
     };
 
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+        if (!formState.name) newErrors.name = 'Name is required';
+        if (!formState.email) newErrors.email = 'Email is required';
+        if (!formState.password) newErrors.password = 'Password is required';
+        if (formState.password !== formState.passwordConfirmation) newErrors.passwordConfirmation = 'Passwords do not match';
+        return newErrors;
+    };
+
+    return {
+        formState,
+        errors,
+        loading,
+        setErrors,
+        setLoading,
+        handleChange,
+        validateForm,
+    };
+};
+
+const registerUser = async (formState: any) => {
+    const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/register`,
+        {
+            name: formState.name,
+            email: formState.email,
+            password: formState.password,
+            password_confirmation: formState.passwordConfirmation,
+        },
+        {
+            withCredentials: true,
+        }
+    );
+    return response.data.token;
+};
+
+const RegisterPage: React.FC = () => {
+    const {
+        formState,
+        errors,
+        loading,
+        setErrors,
+        setLoading,
+        handleChange,
+        validateForm,
+    } = useFormState({
+        name: '',
+        email: '',
+        password: '',
+        passwordConfirmation: '',
+    });
+
+    const navigate = useNavigate();
+
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrors({});
 
-        const validationErrors = validateForm(formState);
+        const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
 
         setLoading(true);
-        setErrors({});
-
         try {
-            const response = await axios.post(
-                `${process.env.REACT_APP_API_URL}/api/register`,
-                {
-                    name: formState.name,
-                    email: formState.email,
-                    password: formState.password,
-                    password_confirmation: formState.passwordConfirmation,
-                },
-                {
-                    withCredentials: true, // Ensure credentials like cookies are included in requests
-                }
-            );
-
-            localStorage.setItem('auth_token', response.data.token);
+            const token = await registerUser(formState);
+            localStorage.setItem('auth_token', token);
             navigate('/contact-books');
         } catch (error: any) {
-            if (error.response && error.response.data.errors) {
-                setErrors(error.response.data.errors);
-            } else {
-                setErrors({ general: 'Something went wrong. Please try again.' });
-            }
+            setErrors(error.response?.data?.errors || { general: 'Something went wrong. Please try again.' });
         } finally {
             setLoading(false);
         }
