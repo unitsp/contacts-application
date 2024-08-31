@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Contact\StoreContactRequest;
 use App\Http\Requests\Contact\UpdateContactRequest;
+use App\Jobs\CreateContactJob;
 use Illuminate\Support\Facades\Auth;
 
 class ContactController extends Controller
@@ -11,17 +12,16 @@ class ContactController extends Controller
     public function store(StoreContactRequest $request, $contactBookId)
     {
         $contactBook = Auth::user()->contactBooks()->findOrFail($contactBookId);
-
-        $contact = $contactBook->contacts()->create($request->validated());
-
-        return response()->json($contact, 201);
+        // Dispatch the job to create the contact
+        CreateContactJob::dispatch($contactBook, $request->validated());
+        // Return a 202 Accepted response indicating the task has been created
+        return response()->json(['message' => 'Contact creation task has been created'], 202);
     }
 
     public function show($contactBookId, $id)
     {
         $contactBook = Auth::user()->contactBooks()->findOrFail($contactBookId);
         $contact = $contactBook->contacts()->findOrFail($id);
-
         return response()->json($contact);
     }
 

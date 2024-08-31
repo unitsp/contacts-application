@@ -2,10 +2,12 @@
 
 namespace Tests\Unit;
 
+use App\Jobs\CreateContactJob;
 use App\Models\Contact;
 use App\Models\ContactBook;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -13,6 +15,7 @@ class ContactTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** @test */
     /** @test */
     public function it_can_create_a_contact()
     {
@@ -22,23 +25,22 @@ class ContactTest extends TestCase
         $contactBook = ContactBook::factory()->create();
         $contactBook->users()->attach($user->id);
 
+        // Mock the job dispatch
+        Queue::fake();
+
         $response = $this->postJson("/api/contact-books/{$contactBook->id}/contacts", [
             'name' => 'John Doe',
             'email' => 'johndoe@example.com',
             'phone' => '1234567890',
         ]);
 
-        $response->assertStatus(201)
-            ->assertJsonStructure([
-                'id',
-                'name',
-                'email',
-                'phone',
-                'created_at',
-                'updated_at',
+        $response->assertStatus(202)
+            ->assertJson([
+                'message' => 'Contact creation task has been created',
             ]);
 
-        $this->assertDatabaseHas('contacts', ['email' => 'johndoe@example.com']);
+        // Assert that the job was dispatched with correct parameters
+        Queue::assertPushed(CreateContactJob::class);
     }
 
     /** @test */

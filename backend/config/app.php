@@ -86,6 +86,8 @@ return [
 
     'locale' => 'en',
 
+    'delay' => env('DELAY_SEC', 0),
+
     /*
     |--------------------------------------------------------------------------
     | Application Fallback Locale
