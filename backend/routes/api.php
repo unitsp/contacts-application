@@ -17,16 +17,14 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     // Contact Books Routes
-    Route::get('/contact-books', [ContactBookController::class, 'index']);
-    Route::post('/contact-books', [ContactBookController::class, 'store']);
-    Route::get('/contact-books/{id}', [ContactBookController::class, 'show']);
-    Route::put('/contact-books/{id}', [ContactBookController::class, 'update']);
-    Route::delete('/contact-books/{id}', [ContactBookController::class, 'destroy']);
-    Route::post('/contact-books/{id}/share', [ContactBookController::class, 'share']);
+    Route::apiResource('contact-books', ContactBookController::class);
+
+    // Additional ContactBook Routes
+    Route::post('/contact-books/{contact_book}/share', [ContactBookController::class, 'share']);
 
     // Contacts Routes
-    Route::post('/contact-books/{contactBookId}/contacts', [ContactController::class, 'store']);
-    Route::get('/contact-books/{contactBookId}/contacts/{id}', [ContactController::class, 'show']);
-    Route::put('/contact-books/{contactBookId}/contacts/{id}', [ContactController::class, 'update']);
-    Route::delete('/contact-books/{contactBookId}/contacts/{id}', [ContactController::class, 'destroy']);
+    Route::prefix('contact-books/{contact_book}')->group(function () {
+        Route::apiResource('contacts', ContactController::class);
+    });
 });
+

@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
     supervisor
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -43,7 +45,6 @@ COPY .dev-ops/queue_worker/supervisord.conf /etc/supervisor/conf.d/supervisord.c
 WORKDIR /var/www/html
 
 # Run Laravel commands and Supervisor
-CMD /bin/sh -c "php artisan migrate --force && \
-                php artisan config:cache && \
+CMD /bin/sh -c "php artisan config:cache && \
                 php artisan route:cache && \
                 supervisord -c /etc/supervisor/conf.d/supervisord.conf"

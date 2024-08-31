@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ContactBooksPage from './pages/ContactBooksPage';
+import ContactDetailsPage from './pages/ContactDetailsPage';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 
 const App: React.FC = () => {
@@ -16,6 +17,10 @@ const App: React.FC = () => {
                 <Route
                     path="/contact-books"
                     element={<AuthenticatedRoute element={<ContactBooksPage />} />}
+                />
+                <Route
+                    path="/contact-books/:contactBookId/contacts"
+                    element={<AuthenticatedRoute element={<ContactDetailsPage />} />}
                 />
             </Routes>
         </Router>

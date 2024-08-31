@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 interface ContactBook {
     id: number;
@@ -37,6 +39,8 @@ const ContactBookList: React.FC = () => {
     const { contactBooks, setContactBooks, loading, error } = useContactBooks();
     const [editingBookId, setEditingBookId] = useState<number | null>(null);
     const [newBookName, setNewBookName] = useState<string>('');
+
+    const navigate = useNavigate();
 
     const handleCreateOrUpdateContactBook = useCallback(async () => {
         if (!newBookName.trim()) return;
@@ -132,7 +136,10 @@ const ContactBookList: React.FC = () => {
                             >
                                 Delete
                             </button>
-                            <button className="text-indigo-600 hover:text-indigo-900 font-medium">
+                            <button
+                                onClick={() => navigate(`/contact-books/${book.id}/contacts`)}
+                                className="text-indigo-600 hover:text-indigo-900 font-medium"
+                            >
                                 View Details
                             </button>
                         </div>
