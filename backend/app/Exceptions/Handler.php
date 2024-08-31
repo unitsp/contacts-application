@@ -7,6 +7,8 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -55,6 +57,17 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        // Log every exception
+        Log::error('Exception caught:', [
+            'exception' => $exception,
+            'request' => $request->all(),
+        ]);
+
+        // Optionally add the exception to Laravel Pulse, if enabled
+        if (App::bound('pulse')) {
+            App::make('pulse')->addException($exception);
+        }
+
         // Handle authentication exceptions
         if ($exception instanceof AuthenticationException) {
             return response()->json(['error' => 'Unauthenticated.'], Response::HTTP_UNAUTHORIZED);

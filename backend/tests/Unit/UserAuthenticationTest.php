@@ -13,7 +13,7 @@ class UserAuthenticationTest extends TestCase
     /** @test */
     public function it_can_register_a_user()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson(route('auth.register'), [
             'name' => 'John Doe',
             'email' => 'johndoe@example.com',
             'password' => 'password',
@@ -40,7 +40,7 @@ class UserAuthenticationTest extends TestCase
     /** @test */
     public function it_fails_to_register_a_user_with_invalid_data()
     {
-        $response = $this->postJson('/api/register', [
+        $response = $this->postJson(route('auth.register'), [
             'name' => '',
             'email' => 'not-an-email',
             'password' => 'short',
@@ -58,7 +58,7 @@ class UserAuthenticationTest extends TestCase
             'password' => bcrypt('password'),
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson(route('auth.login'), [
             'email' => 'johndoe@example.com',
             'password' => 'password',
         ]);
@@ -84,10 +84,11 @@ class UserAuthenticationTest extends TestCase
             'password' => bcrypt('password'),
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson(route('auth.login'), [
             'email' => 'johndoe@example.com',
             'password' => 'wrongpassword',
         ]);
+
         $response->assertStatus(401)
             ->assertJson(['error' => 'Invalid login credentials']);
     }

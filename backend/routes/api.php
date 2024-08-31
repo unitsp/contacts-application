@@ -1,30 +1,52 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ContactBookController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PusherAuthController;
 
+// API Versioning Prefix
+Route::prefix('v1')->group(function () {
 
-Route::post('register', RegisterController::class);
-Route::post('login', LoginController::class);
+    // Auth Routes
+    Route::post('auth/register', RegisterController::class)->name('auth.register');
+    Route::post('auth/login', LoginController::class)->name('auth.login');
 
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
+    // Routes that require Sanctum Authentication
+    Route::middleware('auth:sanctum')->group(function () {
 
-Route::middleware('auth:sanctum')->group(function () {
-    // Contact Books Routes
-    Route::apiResource('contact-books', ContactBookController::class);
+        // Retrieve Authenticated User
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        })->name('user.show');
 
-    // Additional ContactBook Routes
-    Route::post('/contact-books/{contact_book}/share', [ContactBookController::class, 'share']);
+        // Contact Books Routes
+        Route::apiResource('contact-books', ContactBookController::class)->names([
+            'index' => 'contact-books.index',
+            'store' => 'contact-books.store',
+            'show' => 'contact-books.show',
+            'update' => 'contact-books.update',
+            'destroy' => 'contact-books.destroy',
+        ]);
 
-    // Contacts Routes
-    Route::prefix('contact-books/{contact_book}')->group(function () {
-        Route::apiResource('contacts', ContactController::class);
+        // Additional ContactBook Routes
+        Route::post('/contact-books/{contact_book}/share', [ContactBookController::class, 'share'])
+            ->name('contact-books.share');
+
+        // Contacts Routes within Contact Books
+        Route::prefix('contact-books/{contact_book}')->group(function () {
+            Route::apiResource('contacts', ContactController::class)->names([
+                'index' => 'contacts.index',
+                'store' => 'contacts.store',
+                'show' => 'contacts.show',
+                'update' => 'contacts.update',
+                'destroy' => 'contacts.destroy',
+            ]);
+        });
+
+        // Pusher Authentication Route
+        Route::post('/pusher/auth', PusherAuthController::class)->name('pusher.auth');
     });
 });
-

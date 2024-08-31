@@ -16,7 +16,6 @@ class ContactTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    /** @test */
     public function it_can_create_a_contact()
     {
         $user = User::factory()->create();
@@ -28,7 +27,7 @@ class ContactTest extends TestCase
         // Mock the job dispatch
         Queue::fake();
 
-        $response = $this->postJson("/api/contact-books/{$contactBook->id}/contacts", [
+        $response = $this->postJson(route('contacts.store', $contactBook->id), [
             'name' => 'John Doe',
             'email' => 'johndoe@example.com',
             'phone' => '1234567890',
@@ -57,7 +56,7 @@ class ContactTest extends TestCase
             'name' => 'Jane Doe',
         ]);
 
-        $response = $this->getJson("/api/contact-books/{$contactBook->id}/contacts/{$contact->id}");
+        $response = $this->getJson(route('contacts.show', [$contactBook->id, $contact->id]));
 
         $response->assertStatus(200)
             ->assertJson([
@@ -82,7 +81,7 @@ class ContactTest extends TestCase
             'phone' => '1234567890',
         ]);
 
-        $response = $this->putJson("/api/contact-books/{$contactBook->id}/contacts/{$contact->id}", [
+        $response = $this->putJson(route('contacts.update', [$contactBook->id, $contact->id]), [
             'name' => 'New Name',
             'email' => 'new@example.com',
             'phone' => '0987654321',
@@ -113,7 +112,7 @@ class ContactTest extends TestCase
             'name' => 'Temporary Contact',
         ]);
 
-        $response = $this->deleteJson("/api/contact-books/{$contactBook->id}/contacts/{$contact->id}");
+        $response = $this->deleteJson(route('contacts.destroy', [$contactBook->id, $contact->id]));
 
         $response->assertStatus(204);
         $this->assertDatabaseMissing('contacts', ['id' => $contact->id]);

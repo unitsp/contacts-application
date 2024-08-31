@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\ContactCreated;
 use App\Models\ContactBook;
 use App\Models\Contact;
 use Illuminate\Bus\Queueable;
@@ -39,6 +40,7 @@ class CreateContactJob implements ShouldQueue
     {
         Log::info('CreateContactJob has been processed.');
         sleep(config('app.delay'));
-        $this->contactBook->contacts()->create($this->contactData);
+        $contact = $this->contactBook->contacts()->create($this->contactData);
+        broadcast(new ContactCreated($contact))->toOthers();
     }
 }

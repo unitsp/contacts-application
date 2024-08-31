@@ -5,8 +5,8 @@ namespace Tests\Unit;
 use App\Models\ContactBook;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use Laravel\Sanctum\Sanctum;
 
 class ContactBookTest extends TestCase
 {
@@ -18,9 +18,10 @@ class ContactBookTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['api']);
 
-        $response = $this->postJson('/api/contact-books', [
+        $response = $this->postJson(route('contact-books.store'), [
             'name' => 'Personal Contacts',
         ]);
+
         $response->assertStatus(201)
             ->assertJsonStructure([
                 'id',
@@ -41,7 +42,7 @@ class ContactBookTest extends TestCase
         $contactBook = ContactBook::factory()->create(['name' => 'Work Contacts']);
         $contactBook->users()->attach($user->id);
 
-        $response = $this->getJson("/api/contact-books/{$contactBook->id}");
+        $response = $this->getJson(route('contact-books.show', $contactBook->id));
 
         $response->assertStatus(200)
             ->assertJson([
@@ -59,7 +60,7 @@ class ContactBookTest extends TestCase
         $contactBook = ContactBook::factory()->create(['name' => 'Old Name']);
         $contactBook->users()->attach($user->id);
 
-        $response = $this->putJson("/api/contact-books/{$contactBook->id}", [
+        $response = $this->putJson(route('contact-books.update', $contactBook->id), [
             'name' => 'Updated Contacts',
         ]);
 
@@ -78,7 +79,7 @@ class ContactBookTest extends TestCase
         $contactBook = ContactBook::factory()->create(['name' => 'Temporary Contacts']);
         $contactBook->users()->attach($user->id);
 
-        $response = $this->deleteJson("/api/contact-books/{$contactBook->id}");
+        $response = $this->deleteJson(route('contact-books.destroy', $contactBook->id));
 
         $response->assertStatus(204);
         $this->assertDatabaseMissing('contact_books', ['id' => $contactBook->id]);
@@ -93,7 +94,7 @@ class ContactBookTest extends TestCase
         $contactBook = ContactBook::factory()->create();
         $contactBook->users()->attach($owner->id);
 
-        $response = $this->postJson("/api/contact-books/{$contactBook->id}/share", [
+        $response = $this->postJson(route('contact-books.share', $contactBook->id), [
             'user_id' => $userToShareWith->id,
         ]);
 

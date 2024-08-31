@@ -5,6 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/backend/app" isTestSource="false" packagePrefix="App\" />
       <sourceFolder url="file://$MODULE_DIR$/backend/database/factories" isTestSource="false" packagePrefix="Database\Factories\" />
       <sourceFolder url="file://$MODULE_DIR$/backend/database/seeders" isTestSource="false" packagePrefix="Database\Seeders\" />
+      <sourceFolder url="file://$MODULE_DIR$/backend/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/backend/tests" isTestSource="true" packagePrefix="Tests\" />
       <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
@@ -122,6 +123,12 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/polyfill-uuid" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/uid" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/doctrine/sql-formatter" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/laravel/pulse" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/livewire/livewire" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/paragonie/random_compat" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/paragonie/sodium_compat" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/pusher/pusher-php-server" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
