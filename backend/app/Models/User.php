@@ -58,4 +58,9 @@ class User extends Authenticatable
         return $this->belongsToMany(ContactBook::class);
     }
 
+    public function canAccessContactBook($contactBookId): bool
+    {
+        return $this->contactBooks()->where('contact_books.id', $contactBookId)->exists();
+    }
+
 }

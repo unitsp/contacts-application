@@ -18,7 +18,7 @@ const useContactBooks = () => {
     useEffect(() => {
         const fetchContactBooks = async () => {
             try {
-                const { data } = await axios.get<ContactBook[]>(`${process.env.REACT_APP_API_URL}/api/contact-books`, {
+                const { data } = await axios.get<ContactBook[]>(`${process.env.REACT_APP_API_URL}/contact-books`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
                 });
                 setContactBooks(data);
@@ -51,13 +51,13 @@ const ContactBookList: React.FC = () => {
 
         try {
             if (editingBookId !== null) {
-                const { data } = await axios.put(`${process.env.REACT_APP_API_URL}/api/contact-books/${editingBookId}`,
+                const { data } = await axios.put(`${process.env.REACT_APP_API_URL}/contact-books/${editingBookId}`,
                     { name: newBookName }, requestConfig);
                 setContactBooks(prevBooks => prevBooks.map(book =>
                     book.id === editingBookId ? { ...book, name: data.name } : book
                 ));
             } else {
-                const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/contact-books`,
+                const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/contact-books`,
                     { name: newBookName }, requestConfig);
                 setContactBooks(prevBooks => [...prevBooks, data]);
             }
@@ -75,7 +75,7 @@ const ContactBookList: React.FC = () => {
 
     const handleDeleteContactBook = useCallback(async (id: number) => {
         try {
-            await axios.delete(`${process.env.REACT_APP_API_URL}/api/contact-books/${id}`, {
+            await axios.delete(`${process.env.REACT_APP_API_URL}/contact-books/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
             });
             setContactBooks(prevBooks => prevBooks.filter(book => book.id !== id));

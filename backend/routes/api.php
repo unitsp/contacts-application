@@ -5,14 +5,13 @@ use App\Http\Controllers\ContactBookController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\PusherAuthController;
 
 // API Versioning Prefix
 Route::prefix('v1')->group(function () {
 
     // Auth Routes
-    Route::post('auth/register', RegisterController::class)->name('auth.register');
-    Route::post('auth/login', LoginController::class)->name('auth.login');
+    Route::post('register', RegisterController::class)->name('auth.register');
+    Route::post('login', LoginController::class)->name('auth.login');
 
     // Routes that require Sanctum Authentication
     Route::middleware('auth:sanctum')->group(function () {
@@ -46,7 +45,5 @@ Route::prefix('v1')->group(function () {
             ]);
         });
 
-        // Pusher Authentication Route
-        Route::post('/pusher/auth', PusherAuthController::class)->name('pusher.auth');
     });
 });

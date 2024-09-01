@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Events\ContactCreated;
 use App\Models\ContactBook;
 use App\Models\Contact;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -40,7 +41,17 @@ class CreateContactJob implements ShouldQueue
     {
         Log::info('CreateContactJob has been processed.');
         sleep(config('app.delay'));
-        $contact = $this->contactBook->contacts()->create($this->contactData);
-        broadcast(new ContactCreated($contact))->toOthers();
+        $contact = $this->contactBook->contacts()->firstOrCreate(
+            [
+                'email' => $this->contactData['email']
+            ],
+            $this->contactData
+        );
+        try {
+            broadcast(new ContactCreated($contact))->toOthers();
+        } catch (Exception $e) {
+            Log::error('Pusher error: ' . $e->getCode() . $e->getMessage());
+        }
+
     }
 }

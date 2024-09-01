@@ -17,9 +17,12 @@ class CreateContactsTable extends Migration
             $table->id();
             $table->foreignId('contact_book_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('phone');
             $table->timestamps();
+
+            // Create a composite unique index for contact_book_id and email
+            $table->unique(['contact_book_id', 'email']);
         });
     }
 

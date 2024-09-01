@@ -1,6 +1,7 @@
 # Variables
 DOCKER_COMPOSE = docker-compose
 APP_CONTAINER = laravel_app
+QUEUE_CONTAINER = laravel_queue_worker
 
 # Rebuild everything from scratch
 rebuild: clean build install
@@ -20,7 +21,6 @@ build:
 # Install the app (start services, install dependencies, run migrations)
 install: start
 	docker exec $(APP_CONTAINER) composer install
-	docker exec $(APP_CONTAINER) php artisan migrate
 
 # Start the app (Docker containers)
 start:
@@ -37,6 +37,14 @@ ssh:
 # Run migration
 migrate:
 	docker exec -it $(APP_CONTAINER) php artisan migrate
+
+clear-cache:
+	docker exec -it $(APP_CONTAINER) php artisan optimize:clear
+	docker exec -it $(APP_CONTAINER) php artisan route:cache
+	docker exec -it $(APP_CONTAINER) php artisan config:cache
+	docker exec -it $(QUEUE_CONTAINER) php artisan optimize:clear
+	docker exec -it $(QUEUE_CONTAINER) php artisan route:cache
+	docker exec -it $(QUEUE_CONTAINER) php artisan config:cache
 
 # Run PHP unit tests
 test:

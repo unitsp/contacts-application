@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import Pusher from 'pusher-js';
-import toast, { Toaster } from 'react-hot-toast'; // For notifications
+import toast, { Toaster } from 'react-hot-toast';
 
 interface Contact {
     id: number;
@@ -20,15 +20,27 @@ interface ContactCreatedEvent {
     contact: Contact;
 }
 
-const useContacts = (contactBookId: number) => {
+interface NewContact {
+    name: string;
+    email: string;
+    phone: string;
+}
+
+const useContacts = (contactBookId: number, token: string | null) => {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchContacts = useCallback(async () => {
+        if (!token) {
+            setError('Authorization token not available.');
+            setLoading(false);
+            return;
+        }
+
         try {
-            const { data } = await axios.get<Contact[]>(`${process.env.REACT_APP_API_URL}/api/contact-books/${contactBookId}/contacts`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+            const { data } = await axios.get<Contact[]>(`${process.env.REACT_APP_API_URL}/contact-books/${contactBookId}/contacts`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
             setContacts(data);
         } catch {
@@ -36,74 +48,102 @@ const useContacts = (contactBookId: number) => {
         } finally {
             setLoading(false);
         }
-    }, [contactBookId]);
+    }, [contactBookId, token]);
 
     useEffect(() => {
         fetchContacts();
     }, [fetchContacts]);
 
-    return { contacts, setContacts, loading, error, reloadContacts: fetchContacts };
+    return { contacts, setContacts, loading, error };
 };
 
 const ContactList: React.FC<ContactListProps> = ({ contactBookId }) => {
-    const { contacts, setContacts, loading, error } = useContacts(contactBookId);
+    const token = useMemo(() => localStorage.getItem('auth_token'), []);
+    const { contacts, setContacts, loading, error } = useContacts(contactBookId, token);
     const [editingContactId, setEditingContactId] = useState<number | null>(null);
-    const [newContact, setNewContact] = useState<{ name: string, email: string, phone: string }>({
-        name: '',
-        email: '',
-        phone: ''
-    });
+    const [newContact, setNewContact] = useState<NewContact>({ name: '', email: '', phone: '' });
 
     useEffect(() => {
+        if (!token) return;
+        console.log(token, 'token')
+        console.log(contactBookId, 'contactBookId')
+        console.log(
+            process.env.REACT_APP_PUSHER_APP_KEY,
+            process.env.REACT_APP_PUSHER_CLUSTER,
+            process.env.REACT_APP_API_URL
+        );
         const pusher = new Pusher(
             process.env.REACT_APP_PUSHER_APP_KEY || '',
             {
                 cluster: process.env.REACT_APP_PUSHER_CLUSTER || '',
-                forceTLS: false,
+                forceTLS: true,
                 authEndpoint: `${process.env.REACT_APP_API_URL}/broadcasting/auth`,
+                auth: {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
             }
         );
 
         const channel = pusher.subscribe(`private-contact-book.${contactBookId}`);
 
-        channel.bind('ContactCreated', (data: ContactCreatedEvent) => {
-            toast.success(`Contact "${data.contact.name}" from Contact List Created`);
+        // Listening for subscription success
+        channel.bind('pusher:subscription_succeeded', () => {
+            console.log(`Successfully subscribed to private-contact-book.${contactBookId}`);
 
-            // Optimized code: Directly append the new contact to the contacts state
-            setContacts(prevContacts => [...prevContacts, data.contact]);
+            // Now that subscription has succeeded, we can safely bind events
+            channel.bind('App\\Events\\ContactCreated', (data: ContactCreatedEvent) => {
+                console.log('Contact created:', data.contact);
+                toast.success(`Contact "${data.contact.name}" was created.`);
+                setContacts(prevContacts => [...prevContacts, data.contact]);
+            });
         });
+
+        // Listening for subscription errors
+        channel.bind('pusher:subscription_error', (status: unknown) => {
+            console.error(`Subscription error for channel private-contact-book.${contactBookId}`, status);
+        });
+
+        console.log('Attempting to subscribe to private-contact-book.', contactBookId);
 
         return () => {
             channel.unbind_all();
             channel.unsubscribe();
         };
-    }, [contactBookId, setContacts]);
+    }, [contactBookId, setContacts, token]);
+
+
+
 
     const handleCreateOrUpdateContact = useCallback(async () => {
-        if (!newContact.name.trim() || !newContact.email.trim() || !newContact.phone.trim()) return;
+        if (!newContact.name.trim() || !newContact.email.trim() || !newContact.phone.trim() || !token) return;
 
         const requestConfig = {
-            headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+            headers: { Authorization: `Bearer ${token}` },
         };
 
         try {
             if (editingContactId !== null) {
-                const { data } = await axios.put(`${process.env.REACT_APP_API_URL}/api/contact-books/${contactBookId}/contacts/${editingContactId}`,
-                    newContact, requestConfig);
+                const { data } = await axios.put(
+                    `${process.env.REACT_APP_API_URL}/contact-books/${contactBookId}/contacts/${editingContactId}`,
+                    newContact, requestConfig
+                );
                 setContacts(prevContacts => prevContacts.map(contact =>
                     contact.id === editingContactId ? { ...contact, ...data } : contact
                 ));
             } else {
-                await axios.post(`${process.env.REACT_APP_API_URL}/api/contact-books/${contactBookId}/contacts`,
+                await axios.post(`${process.env.REACT_APP_API_URL}/contact-books/${contactBookId}/contacts`,
                     newContact, requestConfig);
-                toast(`Contact Creation Started`); // Show a notification when creation starts
+                toast('Contact creation started.');
             }
             setNewContact({ name: '', email: '', phone: '' });
             setEditingContactId(null);
         } catch (error) {
+            toast.error(`Failed to ${editingContactId ? 'update' : 'create'} contact.`);
             console.error(`Failed to ${editingContactId ? 'update' : 'create'} contact.`, error);
         }
-    }, [newContact, editingContactId, setContacts, contactBookId]);
+    }, [newContact, editingContactId, setContacts, contactBookId, token]);
 
     const handleEditContact = (contact: Contact) => {
         setEditingContactId(contact.id);
@@ -111,17 +151,20 @@ const ContactList: React.FC<ContactListProps> = ({ contactBookId }) => {
     };
 
     const handleDeleteContact = useCallback(async (id: number) => {
+        if (!token) return;
+
         try {
-            await axios.delete(`${process.env.REACT_APP_API_URL}/api/contact-books/${contactBookId}/contacts/${id}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+            await axios.delete(`${process.env.REACT_APP_API_URL}/contact-books/${contactBookId}/contacts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
             setContacts(prevContacts => prevContacts.filter(contact => contact.id !== id));
         } catch (error) {
+            toast.error('Failed to delete contact.');
             console.error('Failed to delete contact.', error);
         }
-    }, [setContacts, contactBookId]);
+    }, [setContacts, contactBookId, token]);
 
-    const formatDateTime = (dateTimeString: string) => {
+    const formatDateTime = useCallback((dateTimeString: string) => {
         return new Date(dateTimeString).toLocaleString(undefined, {
             year: 'numeric',
             month: 'long',
@@ -130,14 +173,40 @@ const ContactList: React.FC<ContactListProps> = ({ contactBookId }) => {
             minute: '2-digit',
             second: '2-digit',
         });
-    };
+    }, []);
+
+    const ContactItem: React.FC<{ contact: Contact }> = ({ contact }) => (
+        <li key={contact.id} className="py-4 flex justify-between items-center">
+            <div>
+                <h2 className="text-lg font-semibold text-gray-900">{contact.name}</h2>
+                <p className="text-sm text-gray-500">Email: {contact.email}</p>
+                <p className="text-sm text-gray-500">Phone: {contact.phone}</p>
+                <p className="text-sm text-gray-500">Created: {formatDateTime(contact.created_at)}</p>
+                <p className="text-sm text-gray-500">Updated: {formatDateTime(contact.updated_at)}</p>
+            </div>
+            <div className="flex space-x-2">
+                <button
+                    onClick={() => handleEditContact(contact)}
+                    className="text-blue-600 hover:text-blue-900 font-medium"
+                >
+                    Edit
+                </button>
+                <button
+                    onClick={() => handleDeleteContact(contact.id)}
+                    className="text-red-600 hover:text-red-900 font-medium"
+                >
+                    Delete
+                </button>
+            </div>
+        </li>
+    );
 
     if (loading) return <p className="text-gray-500 text-center">Loading...</p>;
     if (error) return <p className="text-red-500 text-center">{error}</p>;
 
     return (
         <div className="bg-white shadow-lg rounded-lg p-6">
-            <Toaster /> {/* Add this line to include the toast notifications */}
+            <Toaster />
             <div className="mb-4 flex justify-between items-center">
                 <input
                     type="text"
@@ -172,29 +241,7 @@ const ContactList: React.FC<ContactListProps> = ({ contactBookId }) => {
             ) : (
                 <ul className="divide-y divide-gray-200">
                     {contacts.map((contact) => (
-                        <li key={contact.id} className="py-4 flex justify-between items-center">
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-900">{contact.name}</h2>
-                                <p className="text-sm text-gray-500">Email: {contact.email}</p>
-                                <p className="text-sm text-gray-500">Phone: {contact.phone}</p>
-                                <p className="text-sm text-gray-500">Created: {formatDateTime(contact.created_at)}</p>
-                                <p className="text-sm text-gray-500">Updated: {formatDateTime(contact.updated_at)}</p>
-                            </div>
-                            <div className="flex space-x-2">
-                                <button
-                                    onClick={() => handleEditContact(contact)}
-                                    className="text-blue-600 hover:text-blue-900 font-medium"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteContact(contact.id)}
-                                    className="text-red-600 hover:text-red-900 font-medium"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </li>
+                        <ContactItem key={contact.id} contact={contact} />
                     ))}
                 </ul>
             )}
