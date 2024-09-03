@@ -34,6 +34,9 @@ stop:
 ssh:
 	docker exec -it $(APP_CONTAINER) /bin/sh
 
+ssh-queue:
+	docker exec -it $(APP_CONTAINER) /bin/sh
+
 # Run migration
 migrate:
 	docker exec -it $(APP_CONTAINER) php artisan migrate

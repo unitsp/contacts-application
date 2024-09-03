@@ -15,3 +15,5 @@ yarn-error.log
 /.vscode
 /supervisord.pid
 /supervisord.log
+/phpunit.xml.bak
+/.phpunit.cache/test-results

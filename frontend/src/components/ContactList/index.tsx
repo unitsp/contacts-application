@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Toaster } from 'react-hot-toast';
 import useContacts from '../../hooks/useContacts';
-import usePusher from '../../hooks/usePusher';
+import usePusher from '../../hooks/Pusher/useContactPusher';
 import ContactModal from './ContactModal';
 import ContactForm from './ContactForm';
 import ContactListWrapper from './ContactListWrapper';

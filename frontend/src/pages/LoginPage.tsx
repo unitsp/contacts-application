@@ -42,7 +42,7 @@ const loginUser = async (formState: any) => {
             withCredentials: true,
         }
     );
-    return response.data.token;
+    return response.data;
 };
 
 const LoginPage: React.FC = () => {
@@ -74,8 +74,9 @@ const LoginPage: React.FC = () => {
 
         setLoading(true);
         try {
-            const token = await loginUser(formState);
-            localStorage.setItem('auth_token', token);
+            const userData = await loginUser(formState);
+            localStorage.setItem('auth_token', userData.token);
+            localStorage.setItem('auth_id', userData.user.id);
             navigate('/contact-books');
         } catch (error: any) {
             if (error.response?.data?.errors) {

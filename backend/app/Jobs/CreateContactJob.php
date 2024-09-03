@@ -32,6 +32,6 @@ class CreateContactJob implements ShouldQueue
             ],
             $this->contactData
         );
-        broadcast(new ContactCreated($contact))->toOthers();
+        broadcast(new ContactCreated($this->contactBook->id))->toOthers();
     }
 }

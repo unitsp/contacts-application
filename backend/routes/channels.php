@@ -19,3 +19,7 @@ use Illuminate\Support\Facades\Log;
 Broadcast::channel('contact-book.{contactBookId}', function (User $user, $contactBookId) {
     return $user->canAccessContactBook($contactBookId);
 });
+
+Broadcast::channel('user-contact-books.{id}', function (User $user, $id) {
+    return (int) $user->id === (int) $id;
+});

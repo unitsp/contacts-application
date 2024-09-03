@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ContactBooksListChanged;
+use App\Events\ContactDeleted;
+use App\Http\Requests\ContactBookRequest;
 use App\Models\ContactBook;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,15 +16,12 @@ class ContactBookController extends Controller
         return response()->json(Auth::user()->contactBooks()->with('contacts')->get());
     }
 
-    public function store(Request $request)
+    public function store(ContactBookRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $contactBook = ContactBook::create($validated);
-        $contactBook->users()->attach(Auth::id());
-
+        $contactBook = ContactBook::create($request->validated());
+        $currentUserId = Auth::id();
+        $contactBook->users()->attach($currentUserId);
+        broadcast(new ContactBooksListChanged($currentUserId))->toOthers();
         return response()->json($contactBook, 201);
     }
 
@@ -31,37 +31,18 @@ class ContactBookController extends Controller
         return response()->json($contactBook);
     }
 
-    public function update(Request $request, $id)
+    public function update(ContactBookRequest $request, ContactBook $contactBook)
     {
-        $contactBook = Auth::user()->contactBooks()->findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-        ]);
-
-        $contactBook->update($validated);
-
+        $contactBook->update($request->validated());
+        broadcast(new ContactBooksListChanged(Auth::id()))->toOthers();
         return response()->json($contactBook);
     }
 
-    public function destroy($id)
+    public function destroy(ContactBook $contactBook)
     {
-        $contactBook = Auth::user()->contactBooks()->findOrFail($id);
         $contactBook->delete();
-
+        broadcast(new ContactBooksListChanged(Auth::id()))->toOthers();
         return response()->json(null, 204);
-    }
-
-    public function share($id, Request $request)
-    {
-        $contactBook = Auth::user()->contactBooks()->findOrFail($id);
-
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $contactBook->users()->attach($validated['user_id']);
-
-        return response()->json(['message' => 'Contact book shared successfully.']);
     }
 }

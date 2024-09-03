@@ -2,23 +2,25 @@
 
 namespace App\Events;
 
+use App\Models\Contact;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ContactCreated implements ShouldBroadcastNow
+class ContactBooksListChanged implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $contactBookId;
-    public function __construct($contactBookId)
+    public int $userId;
+    public function __construct(int $userId)
     {
-        $this->contactBookId = $contactBookId;
+        $this->userId = $userId;
     }
     public function broadcastOn(): PrivateChannel
     {
-        return new PrivateChannel('contact-book.' . $this->contactBookId);
+        return new PrivateChannel('user-contact-books.' . $this->userId);
     }
 }
