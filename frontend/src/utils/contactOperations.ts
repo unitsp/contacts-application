@@ -57,7 +57,7 @@ export const updateContact = async (
                 contact.id === editingContactId ? { ...contact, ...data } : contact
             )
         );
-        toast.success('Contact updated successfully.');
+        toast.success('Contact updating started successfully.');
     } catch (error) {
         toast.error('Failed to update contact.');
         console.error('Failed to update contact.', error);

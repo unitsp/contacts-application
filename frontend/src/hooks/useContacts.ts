@@ -30,7 +30,7 @@ const useContacts = (contactBookId: number, token: string | null) => {
         fetchContacts();
     }, [fetchContacts]);
 
-    return { contacts, setContacts, loading, error };
+    return { contacts, setContacts, loading, error, fetchContacts };  // Ensure fetchContacts is returned
 };
 
 export default useContacts;

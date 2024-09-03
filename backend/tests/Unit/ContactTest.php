@@ -1,120 +1,112 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Controllers;
 
-use App\Jobs\CreateContactJob;
+use Tests\TestCase;
+use App\Models\User;
 use App\Models\Contact;
 use App\Models\ContactBook;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
+use Illuminate\Support\Facades\Event;
+use App\Jobs\CreateContactJob;
+use App\Jobs\UpdateContactJob;
+use App\Events\ContactDeleted;
 
 class ContactTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_can_create_a_contact()
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Queue::fake();
+        Event::fake();
+    }
+
+    public function test_index_returns_contacts_for_contact_book()
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
+        $contactBook = ContactBook::factory()->create();
+        $contactBook->users()->attach($user->id);
+        $contacts = Contact::factory()->for($contactBook)->count(3)->create();
 
+        $response = $this->actingAs($user)->getJson(route('contacts.index', $contactBook));
+
+        $response->assertStatus(200)
+            ->assertJsonCount(3);
+
+        foreach ($contacts as $contact) {
+            $response->assertJsonFragment($contact->toArray());
+        }
+    }
+
+    public function test_store_dispatches_create_contact_job()
+    {
+        $user = User::factory()->create();
         $contactBook = ContactBook::factory()->create();
         $contactBook->users()->attach($user->id);
 
-        // Mock the job dispatch
-        Queue::fake();
-
-        $response = $this->postJson(route('contacts.store', $contactBook->id), [
+        $data = [
             'name' => 'John Doe',
             'email' => 'johndoe@example.com',
             'phone' => '1234567890',
-        ]);
+        ];
+
+        $response = $this->actingAs($user)->postJson(route('contacts.store', $contactBook), $data);
 
         $response->assertStatus(202)
-            ->assertJson([
-                'message' => 'Contact creation task has been created',
-            ]);
+            ->assertJson(['message' => 'Contact creation task has been created']);
 
-        // Assert that the job was dispatched with correct parameters
         Queue::assertPushed(CreateContactJob::class);
     }
 
-    /** @test */
-    public function it_can_view_a_contact()
+    public function test_show_returns_contact()
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
-
         $contactBook = ContactBook::factory()->create();
         $contactBook->users()->attach($user->id);
+        $contact = Contact::factory()->for($contactBook)->create();
 
-        $contact = Contact::factory()->create([
-            'contact_book_id' => $contactBook->id,
+        $response = $this->actingAs($user)->getJson(route('contacts.show', [$contactBook->id, $contact->id]));
+
+        $response->assertStatus(200)
+            ->assertJson($contact->toArray());
+    }
+
+    public function test_update_dispatches_update_contact_job()
+    {
+        $user = User::factory()->create();
+        $contactBook = ContactBook::factory()->create();
+        $contactBook->users()->attach($user->id);
+        $contact = Contact::factory()->for($contactBook)->create();
+
+        $data = [
             'name' => 'Jane Doe',
-        ]);
-
-        $response = $this->getJson(route('contacts.show', [$contactBook->id, $contact->id]));
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'id' => $contact->id,
-                'name' => 'Jane Doe',
-            ]);
-    }
-
-    /** @test */
-    public function it_can_update_a_contact()
-    {
-        $user = User::factory()->create();
-        Sanctum::actingAs($user);
-
-        $contactBook = ContactBook::factory()->create();
-        $contactBook->users()->attach($user->id);
-
-        $contact = Contact::factory()->create([
-            'contact_book_id' => $contactBook->id,
-            'name' => 'Old Name',
-            'email' => 'old@example.com',
-            'phone' => '1234567890',
-        ]);
-
-        $response = $this->putJson(route('contacts.update', [$contactBook->id, $contact->id]), [
-            'name' => 'New Name',
-            'email' => 'new@example.com',
+            'email' => 'janedoe@example.com',
             'phone' => '0987654321',
-        ]);
+        ];
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'id' => $contact->id,
-                'name' => 'New Name',
-                'email' => 'new@example.com',
-                'phone' => '0987654321',
-            ]);
+        $response = $this->actingAs($user)->putJson(route('contacts.update', [$contactBook->id, $contact->id]), $data);
+        $response->assertStatus(202)
+            ->assertJson(['message' => 'Contact update task has been created']);
 
-        $this->assertDatabaseHas('contacts', ['email' => 'new@example.com']);
+        Queue::assertPushed(UpdateContactJob::class);
     }
 
-    /** @test */
-    public function it_can_delete_a_contact()
+    public function test_destroy_deletes_contact_and_broadcasts_event()
     {
         $user = User::factory()->create();
-        Sanctum::actingAs($user);
-
         $contactBook = ContactBook::factory()->create();
         $contactBook->users()->attach($user->id);
+        $contact = Contact::factory()->for($contactBook)->create();
 
-        $contact = Contact::factory()->create([
-            'contact_book_id' => $contactBook->id,
-            'name' => 'Temporary Contact',
-        ]);
-
-        $response = $this->deleteJson(route('contacts.destroy', [$contactBook->id, $contact->id]));
+        $response = $this->actingAs($user)->deleteJson(route('contacts.destroy', [$contactBook->id, $contact->id]));
 
         $response->assertStatus(204);
+
         $this->assertDatabaseMissing('contacts', ['id' => $contact->id]);
+
+        Event::assertDispatched(ContactDeleted::class);
     }
 }

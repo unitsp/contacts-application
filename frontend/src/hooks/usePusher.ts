@@ -3,7 +3,11 @@ import Pusher from 'pusher-js';
 import { Contact } from '../types';
 import toast from 'react-hot-toast';
 
-const usePusher = (contactBookId: number, token: string | null, setContacts: React.Dispatch<React.SetStateAction<Contact[]>>) => {
+const usePusher = (
+    contactBookId: number,
+    token: string | null,
+    fetchContacts: () => Promise<void>
+) => {
     useEffect(() => {
         if (!token) return;
 
@@ -21,17 +25,32 @@ const usePusher = (contactBookId: number, token: string | null, setContacts: Rea
         const channel = pusher.subscribe(`private-contact-book.${contactBookId}`);
 
         channel.bind('pusher:subscription_succeeded', () => {
-            channel.bind('App\\Events\\ContactCreated', (data: { contact: Contact }) => {
-                toast.success(`Contact "${data.contact.name}" was created.`);
-                setContacts(prevContacts => [...prevContacts, data.contact]);
+            channel.bind('App\\Events\\ContactCreated', () => {
+                toast.success('A new contact was created.');
+                fetchContacts();
             });
+
+            channel.bind('App\\Events\\ContactUpdated', () => {
+                toast.success('A contact was updated.');
+                fetchContacts();
+            });
+
+            channel.bind('App\\Events\\ContactDeleted', () => {
+                toast.error('A contact was deleted.');
+                fetchContacts();
+            });
+        });
+
+        channel.bind('pusher:subscription_error', (error: any) => {
+            toast.error('Failed to subscribe to channel.');
+            console.error('Pusher subscription error:', error);
         });
 
         return () => {
             channel.unbind_all();
             channel.unsubscribe();
         };
-    }, [contactBookId, setContacts, token]);
+    }, [contactBookId, token, fetchContacts]);
 };
 
 export default usePusher;

@@ -30,12 +30,12 @@ Route::prefix('v1')->group(function () {
             'destroy' => 'contact-books.destroy',
         ]);
 
-        // Additional ContactBook Routes
-        Route::post('/contact-books/{contact_book}/share', [ContactBookController::class, 'share'])
-            ->name('contact-books.share');
+        /* TODO:sharing contact books :) */
+        /*Route::post('/contact-books/{contact_book}/share', [ContactBookController::class, 'share'])
+            ->name('contact-books.share');*/
 
-        // Contacts Routes within Contact Books
-        Route::prefix('contact-books/{contact_book}')->group(function () {
+        // Contacts List actions within Contact Books
+        Route::prefix('contact-books/{contact_book}')->middleware(['hasBook'])->group(function () {
             Route::apiResource('contacts', ContactController::class)->names([
                 'index' => 'contacts.index',
                 'store' => 'contacts.store',

@@ -3,30 +3,30 @@
 namespace App\Http\Requests\Contact;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class StoreContactRequest extends FormRequest
 {
-    public function authorize()
+    public function rules(): array
     {
-        return true;
-    }
-
-    public function rules()
-    {
+        $contactBookId = $this->route('contact_book')['id'] ?? $this->route('contact_book');
         return [
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
-                'string',
                 'email',
                 'max:255',
-                Rule::unique('contacts')->where(function ($query) {
-                    return $query->where('contact_book_id', $this->route('contactBookId'));
+                Rule::unique('contacts')->where(function ($query) use ($contactBookId) {
+                    return $query->where('contact_book_id', $contactBookId);
                 }),
             ],
-            'phone' => 'required|string|max:15',
+            'phone' => ['required', 'string', 'max:20'],
         ];
     }
 
+    public function authorize(): bool
+    {
+        return true;
+    }
 }
