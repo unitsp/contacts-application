@@ -8,9 +8,10 @@ interface ContactListWrapperProps {
     error: string | null;
     handleEditContact: (contact: Contact) => void;
     handleDeleteContact: (id: number) => void;
+    token: string | null;  // Add token to the props
 }
 
-const ContactListWrapper: React.FC<ContactListWrapperProps> = ({ contacts, loading, error, handleEditContact, handleDeleteContact }) => {
+const ContactListWrapper: React.FC<ContactListWrapperProps> = ({ contacts, loading, error, handleEditContact, handleDeleteContact, token }) => {
     if (loading) {
         return <p className="text-gray-500 text-center">Loading...</p>;
     }
@@ -31,6 +32,7 @@ const ContactListWrapper: React.FC<ContactListWrapperProps> = ({ contacts, loadi
                             contact={contact}
                             onEdit={handleEditContact}
                             onDelete={handleDeleteContact}
+                            token={token}  // Pass token down to ContactItem
                         />
                     ))}
                 </ul>

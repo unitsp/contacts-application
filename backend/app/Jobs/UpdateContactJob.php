@@ -42,6 +42,7 @@ class UpdateContactJob implements ShouldQueue
     {
         sleep(config('app.delay'));
         $this->contact->update($this->contactData);
-        broadcast(new ContactUpdated($this->contact->contactBook->id))->toOthers();
+        broadcast(new ContactUpdated($this->contact->contactBook->id, $this->contact))->toOthers();
+//        event(new ContactUpdated($this->contact->contactBook->id, $this->contact));
     }
 }

@@ -62,6 +62,7 @@ const Index: React.FC<{ contactBookId: number }> = ({ contactBookId }) => {
                 error={error}
                 handleEditContact={handleEditContact}
                 handleDeleteContact={handleDeleteContact}
+                token={token}  // Pass token to ContactListWrapper
             />
             <ContactModal isOpen={isModalOpen} onClose={closeModal}>
                 <ContactForm

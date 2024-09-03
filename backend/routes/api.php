@@ -30,11 +30,6 @@ Route::prefix('v1')->group(function () {
             'destroy' => 'contact-books.destroy',
         ]);
 
-        /* TODO:sharing contact books :) */
-        /*Route::post('/contact-books/{contact_book}/share', [ContactBookController::class, 'share'])
-            ->name('contact-books.share');*/
-
-        // Contacts List actions within Contact Books
         Route::prefix('contact-books/{contact_book}')->middleware(['hasBook'])->group(function () {
             Route::apiResource('contacts', ContactController::class)->names([
                 'index' => 'contacts.index',
@@ -44,6 +39,9 @@ Route::prefix('v1')->group(function () {
                 'destroy' => 'contacts.destroy',
             ]);
         });
+
+        Route::get('contacts/{contact}/history', [ContactController::class, 'history'])
+            ->name('contacts.history');
 
     });
 });

@@ -45,4 +45,9 @@ class ContactController extends Controller
         broadcast(new ContactDeleted($contactBookId))->toOthers();
         return response()->json(null, 204);
     }
+
+    public function history(Contact $contact): JsonResponse
+    {
+        return response()->json($contact->histories()->get());
+    }
 }
