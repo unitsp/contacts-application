@@ -13,7 +13,8 @@ contacts-application/
 │   **/**                          # Laravel application files
 │   ├── docker-compose.yml         # Docker Compose configuration for backend services
 ├── frontend/                      # Frontend application directory
-└── Makefile                        # Makefile with backend commands
+│   **/**                          # React application files
+└──                       # Makefile with backend commands
 ```
 
 ## Installation Guide
@@ -28,22 +29,19 @@ Follow these steps to set up the backend application:
     cd backend
     cp .env.example .env
     ```
-3. Edit the .env file and ensure the following variables are set:
-    ```
-    DB_CONNECTION=mysql
-    DB_HOST=db
-    DB_PORT=13306
-    MYSQL_ROOT_PASSWORD=yourpassword
-    MYSQL_DATABASE=contacts_db
-    MYSQL_USER=app
-    MYSQL_PASSWORD=yourpassword
-    ```
 
-4. From the project root directory, build and start the Docker containers:
+3. From the project root directory, build and start the Docker containers:
     ```bash
-      make backend-rebuild
+      make build
+      make migrate
     ```
-5. Once the services are running, open your browser and navigate to:
+4. Once the services are running, open your browser and navigate to:
    ```
     http://localhost:8080
    ```
+5. Move to the frontend directory and run the following commands:
+    ```bash
+    cd ../frontend
+    npm install
+    npm start
+    ```
