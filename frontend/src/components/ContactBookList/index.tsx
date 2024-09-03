@@ -35,7 +35,7 @@ const useContactBooks = () => {
     return { contactBooks, setContactBooks, loading, error };
 };
 
-const ContactBookList: React.FC = () => {
+const Index: React.FC = () => {
     const { contactBooks, setContactBooks, loading, error } = useContactBooks();
     const [editingBookId, setEditingBookId] = useState<number | null>(null);
     const [newBookName, setNewBookName] = useState<string>('');
@@ -150,4 +150,4 @@ const ContactBookList: React.FC = () => {
     );
 };
 
-export default ContactBookList;
+export default Index;

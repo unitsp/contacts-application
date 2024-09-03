@@ -1,5 +1,6 @@
 import React from 'react';
 import { NewContact } from '../../types';
+import FormField from '../Forms/FormField';
 
 interface ContactFormProps {
     newContact: NewContact;
@@ -20,26 +21,24 @@ const ContactForm: React.FC<ContactFormProps> = ({ newContact, setNewContact, ha
 
     return (
         <div className="flex flex-col space-y-4">
-            <input
-                type="text"
-                placeholder="Contact Name"
+            <FormField
+                id="contact-name"
+                label="Contact Name"
                 value={newContact.name}
                 onChange={(e) => setNewContact(prev => ({ ...prev, name: e.target.value }))}
-                className="border rounded p-2"
             />
-            <input
+            <FormField
+                id="contact-email"
+                label="Contact Email"
                 type="email"
-                placeholder="Contact Email"
                 value={newContact.email}
                 onChange={(e) => setNewContact(prev => ({ ...prev, email: e.target.value }))}
-                className="border rounded p-2"
             />
-            <input
-                type="text"
-                placeholder="Contact Phone"
+            <FormField
+                id="contact-phone"
+                label="Contact Phone"
                 value={newContact.phone}
                 onChange={(e) => setNewContact(prev => ({ ...prev, phone: e.target.value }))}
-                className="border rounded p-2"
             />
             <button
                 onClick={handleSubmit}

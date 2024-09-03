@@ -1,5 +1,5 @@
 import React from 'react';
-import ContactBookList from '../components/ContactBookList';
+import ContactBookList from '../components/ContactBookList/index';
 
 const ContactBooksPage: React.FC = () => {
     return (
