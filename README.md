@@ -21,8 +21,7 @@ contacts-application/
 
 Follow these steps to set up the backend application:
 
-### Preparation Step
-## 2. Install Docker and Docker Compose
+### Preparation Step: Install Docker and Docker Compose
 
 1. Install Docker:
     - Download and install Docker from the [official website](https://www.docker.com/products/docker-desktop).
