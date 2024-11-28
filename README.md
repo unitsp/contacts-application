@@ -41,16 +41,43 @@ Follow these steps to set up the backend application:
     cp .env.example .env
     ```
 
-3. From the project root directory, build and start the Docker containers:
+### 2. Build and start backend(API)
+1. From the project root directory, build and start the Docker containers:
     ```bash
       make build
+      make start
+      make key
       make migrate
+      make seed
     ```
-4. Once the services are running, open your browser and navigate to:
+2. Once the services are running, open your browser and navigate to:
    ```
     http://localhost:8080
    ```
-5. Move to the frontend directory and run the following commands:
+### 3. Build and start Front-end (React App)
+
+#### Preparation:
+1. Check if you have node js and npm
+```bash
+node -v && nvm -v
+```
+I am using below versions (most actual at moment of dev):
+```aiignore
+v23.1.0
+0.39.7
+```
+2. If no node / npm, install via Homebrew(OSX):
+```aiignore
+#check you have Homebrew
+brew -v
+#if no brew install:
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+##
+brew update && brew install node
+```
+
+#### Build:
+1. Move to the frontend directory and run the following commands:
     ```bash
     cd ../frontend
     npm install

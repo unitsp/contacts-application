@@ -41,6 +41,10 @@ ssh-queue:
 migrate:
 	docker exec -it $(APP_CONTAINER) php artisan migrate
 
+# Seed test data
+seed:
+	docker exec -it $(APP_CONTAINER) php artisan db:seed
+
 clear-cache:
 	docker exec -it $(APP_CONTAINER) php artisan optimize:clear
 	docker exec -it $(APP_CONTAINER) php artisan route:cache
@@ -52,5 +56,7 @@ clear-cache:
 # Run PHP unit tests
 test:
 	docker exec -it $(APP_CONTAINER) php artisan test
+key:
+	docker exec -it $(APP_CONTAINER) php artisan key:generate
 
 .PHONY: rebuild clean-all clean build install start stop ssh test

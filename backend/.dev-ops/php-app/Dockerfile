@@ -1,23 +1,5 @@
 # Use an official PHP image as the base
-FROM php:8.2-fpm
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    git \
-    curl \
-    libonig-dev \
-    supervisor \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd \
-    && pecl install redis \
-    && docker-php-ext-enable redis
-
+FROM cyberduck/php-fpm-laravel:8.2
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
