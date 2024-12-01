@@ -1,0 +1,14 @@
+{
+  // from https://playwright.dev/docs/test-typescript
+  "compilerOptions": {
+    "lib": ["ES2015", "DOM"],
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@pages/*": ["../src/pages/*"],
+      // "@utils/*": ["../src/utils/*"],
+      "@fixtures/*": ["../src/fixtures/*"],
+      "@data/*": ["../src/data/*"]
+    }
+  }
+}
