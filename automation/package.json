@@ -1,0 +1,19 @@
+{
+  "name": "automation-knot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "Oleksandr Demeniuk",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.1"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "dotenv": "^16.4.5",
+    "faker-js": "^1.0.0"
+  }
+}

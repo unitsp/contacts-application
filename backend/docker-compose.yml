@@ -23,11 +23,23 @@ services:
         volumes:
             - ./:/var/www/html
             - /var/www/html/vendor
+        env_file:
+        - ./.env
         networks:
             - laravel
         depends_on:
             - redis
             - db
+        environment:
+            - APP_ENV=local
+            - APP_DEBUG=true
+            - APP_KEY=${APP_KEY}
+            - DB_CONNECTION=mysql
+            - DB_HOST=db
+            - DB_PORT=3306
+            - DB_DATABASE=${DB_DATABASE}
+            - DB_USERNAME=${DB_USERNAME}
+            - DB_PASSWORD=${DB_PASSWORD}
         ports:
             - "9000:9000"
 
@@ -39,6 +51,7 @@ services:
         working_dir: /var/www/html
         volumes:
             - ./:/var/www/html
+            - /var/www/html/vendor
         env_file:
             - ./.env
         networks:
