@@ -66,7 +66,13 @@ I am using below versions (most actual at moment of dev):
 v23.1.0
 0.39.7
 ```
-2. If no node / npm, install via Homebrew(OSX):
+2. Create a `.env` file by copying the example file:
+    ```bash
+    cd frontend
+    cp .env.example .env
+    ```
+
+3. If no node / npm, install via Homebrew(OSX):
 ```aiignore
 #check you have Homebrew
 brew -v
@@ -83,3 +89,72 @@ brew update && brew install node
     npm install
     npm start
     ```
+
+
+### 4. Automation Framework (UI and API)
+
+Playwright framework was selected to support UI and API Automation. It allows testing [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) with a single API. Playwright is built to enable cross-browser web automation that is **ever-green**, **capable**, **reliable** and **fast**.
+
+Headless execution is supported for all browsers on all platforms. Check out [system requirements](https://playwright.dev/docs/library#system-requirements) for details.
+
+The project is organized as follows:
+
+```plaintext
+
+├── automation                  # Test Automation framework location.
+│   ├── src   
+│       ├── data                # Test data is used to provide input to the test.
+│       ├── fixtures            # Test fixtures are used to establish the environment for each test, giving the test everything it needs. 
+│       ├── pages               # POM approach simplifies maintenance by capturing element selectors in one place and creates reusable code to avoid repetition.             
+│   ├── tests                   # Test scenarios are the test cases that are executed.
+│       ├── api                 # Tests for the backend.
+│       └── e2e                 # Tests for the frontend.
+
+```
+
+
+# <!--Local Installation -->
+## Local Installation
+
+Playwright has its own test runner for end-to-end tests called Playwright Test.
+
+To install locally with npm:
+
+```sh
+# run from your root automation directory
+npm i install
+
+# install supported browsers
+npx playwright install  
+
+# create a `.env` file by copying the example file:
+    ```bash
+    cd automation
+    cp .env.example .
+
+```
+
+# <!-- Running Tests -->
+## Running Tests
+
+```sh
+# to run all tests
+npx playwright test
+
+# to run ui tests only
+npx playwright test tests/e2e
+
+# to run api tests only
+npx playwright test tests/api
+
+# to skip slow tests
+npx playwright test --grep @fast
+
+# generate report
+npx playwright show-report
+
+# debug tests
+npx playwright test test_filename --debug
+
+```
+

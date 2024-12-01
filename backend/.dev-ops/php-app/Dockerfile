@@ -1,5 +1,22 @@
 # Use an official PHP image as the base
-FROM cyberduck/php-fpm-laravel:8.2
+FROM php:8.2-fpm
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    libonig-dev \
+    supervisor \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -8,6 +25,8 @@ WORKDIR /var/www/html
 
 # Copy the application code from the current directory
 COPY . /var/www/html
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Install application dependencies
 RUN composer install
