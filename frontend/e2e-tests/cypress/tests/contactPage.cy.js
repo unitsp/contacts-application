@@ -2,8 +2,8 @@ import ContactPage from "../../page-objects/ContactPage";
 
 describe("Contact Books Page Tests", () => {
     beforeEach(() => {
-        cy.login("admin@admin.com", "password")
-        cy.visit("contact-books/1/contacts")
+        cy.login("admin@admin.com", "password");
+        cy.visit("contact-books/1/contacts");
     });
   
     it("should add a new contact", () => {
