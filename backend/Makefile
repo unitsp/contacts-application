@@ -41,6 +41,10 @@ ssh-queue:
 migrate:
 	docker exec -it $(APP_CONTAINER) php artisan migrate
 
+# Run refresh
+refresh:
+	docker exec -it $(APP_CONTAINER) php artisan migrate:refresh
+
 # Seed test data
 seed:
 	docker exec -it $(APP_CONTAINER) php artisan db:seed

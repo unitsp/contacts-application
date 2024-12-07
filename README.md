@@ -83,3 +83,12 @@ brew update && brew install node
     npm install
     npm start
     ```
+
+## Running Cypress Tests
+After ensuring the frontend and backend is running you can start running tests using the following:
+
+```bash
+npm run cypress:open
+```
+
+Navigating to the E2E tests in the GUI you can start to run end-to-end tests in order to validate your FE changes
